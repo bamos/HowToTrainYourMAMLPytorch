@@ -1,15 +1,31 @@
+#!/usr/bin/env python3
+
 from data import MetaLearningSystemDataLoader
 from experiment_builder import ExperimentBuilder
 from few_shot_learning_system import MAMLFewShotClassifier
-from utils.parser_utils import get_args
 from utils.dataset_tools import maybe_unzip_dataset
 
-# Combines the arguments, model, data and experiment builders to run an experiment
-args, device = get_args()
-model = MAMLFewShotClassifier(args=args, device=device,
-                              im_shape=(2, args.image_channels,
-                                        args.image_height, args.image_width))
-maybe_unzip_dataset(args=args)
-data = MetaLearningSystemDataLoader
-maml_system = ExperimentBuilder(model=model, data=data, args=args, device=device)
-maml_system.run_experiment()
+import torch
+
+from omegaconf import OmegaConf
+import hydra
+
+from setproctitle import setproctitle
+setproctitle('maml++')
+
+@hydra.main(config_path='config.yaml', strict=True)
+def main(cfg):
+    # import sys
+    # from IPython.core import ultratb
+    # sys.excepthook = ultratb.FormattedTB(mode='Verbose',
+    #     color_scheme='Linux', call_pdb=1)
+
+    device = torch.device('cuda')
+    model = MAMLFewShotClassifier(args=cfg, device=device)
+    maybe_unzip_dataset(args=cfg)
+    data = MetaLearningSystemDataLoader
+    maml_system = ExperimentBuilder(model=model, data=data, args=cfg, device=device)
+    maml_system.run_experiment()
+
+if __name__ == '__main__':
+    main()

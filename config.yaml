@@ -1,0 +1,85 @@
+hydra:
+  name: ${dataset.name}.${num_classes_per_set}.${num_samples_per_class}
+  run:
+    dir: ./exps/${hydra.name}.local
+  sweep:
+    # dir: /checkpoint/${env:USER}/data/${now:%Y.%m.%d}/${hydra.name}
+    dir: ./exps/2019.09.12/${hydra.name}
+    subdir: 2_${hydra.job.num}
+
+
+num_dataprovider_workers: 4
+max_models_to_save: 5
+
+dataset: ${omniglot}
+
+sets_are_pre_split: false
+load_from_npz_files: false
+load_into_memory: true
+samples_per_iter: 1
+num_target_samples: 1
+
+num_of_gpus: 1
+
+num_classes_per_set: 20
+num_samples_per_class: 5
+batch_size: 8
+
+omniglot:
+    name: omniglot_dataset
+    path: /private/home/bda/repos/higher-exp/HowToTrainYourMAMLPytorch/datasets/omniglot_dataset
+
+imagenet:
+    name: mini_imagenet_full_size
+    path: /private/home/bda/repos/higher-exp/HowToTrainYourMAMLPytorch/datasets/mini_imagenet_full_size
+
+seed: 0
+train_seed: 0
+val_seed: 0
+test_seed: 0
+
+learnable_inner_opt_params: true
+use_multi_step_loss_optimization: true
+multi_step_loss_num_epochs: 10
+minimum_per_task_contribution: 0.01
+
+num_evaluation_tasks: 600
+
+total_epochs: 150
+total_epochs_before_pause: 150
+total_iter_per_epoch: 500
+continue_from_epoch: latest
+second_order: true
+first_order_to_second_order_epoch: -1
+
+number_of_training_steps_per_iter: 5
+number_of_evaluation_steps_per_iter: 5
+
+evaluate_on_test_set_only: false
+
+meta_learning_rate: 0.001
+min_learning_rate: 1.0e-05
+
+reverse_channels: False
+labels_as_int: False
+reset_stored_filepaths: False
+
+net: vgg
+inner_optim: ${gd}
+
+gd:
+  class: torch.optim.SGD
+  params:
+    lr: 0.1
+
+rprop:
+  class: torch.optim.Rprop
+  params:
+    lr: 0.1
+
+adam:
+  class: torch.optim.Adam
+  params:
+    lr: 0.1
+    beta1: 0.5
+    beta2: 0.5

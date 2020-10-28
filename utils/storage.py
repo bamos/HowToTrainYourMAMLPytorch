@@ -2,7 +2,6 @@ import csv
 import datetime
 import os
 import numpy as np
-from utils.parser_utils import get_args
 import json
 
 def save_to_json(filename, dict_to_store):

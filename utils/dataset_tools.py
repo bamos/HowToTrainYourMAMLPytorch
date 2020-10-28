@@ -2,29 +2,29 @@ import os
 import shutil
 
 def maybe_unzip_dataset(args):
-
-    datasets = [args.dataset_name]
-    dataset_paths = [args.dataset_path]
+    datasets = [args.dataset.name]
+    dataset_paths = [args.dataset.path]
     done = False
 
     for dataset_idx, dataset_path in enumerate(dataset_paths):
         if dataset_path.endswith('/'):
             dataset_path = dataset_path[:-1]
-        print(dataset_path)
-        if not os.path.exists(dataset_path):
-            print("Not found dataset folder structure.. searching for .tar.bz2 file")
-            zip_directory = "{}.tar.bz2".format(os.path.join(os.environ['DATASET_DIR'], datasets[dataset_idx]))
+        assert os.path.exists(dataset_path)
+        # print(dataset_path)
+        # if not os.path.exists(dataset_path):
+        #     print("Not found dataset folder structure.. searching for .tar.bz2 file")
+        #     zip_directory = "{}.tar.bz2".format(os.path.join(os.environ['DATASET_DIR'], datasets[dataset_idx]))
 
-            assert os.path.exists(os.path.abspath(zip_directory)), "{} dataset zip file not found" \
-                                                  "place dataset in datasets folder as explained in README".format(os.path.abspath(zip_directory))
-            print("Found zip file, unpacking")
+        #     assert os.path.exists(os.path.abspath(zip_directory)), "{} dataset zip file not found" \
+        #                                           "place dataset in datasets folder as explained in README".format(os.path.abspath(zip_directory))
+        #     print("Found zip file, unpacking")
 
-            unzip_file(filepath_pack=os.path.join(os.environ['DATASET_DIR'], "{}.tar.bz2".format(datasets[dataset_idx])),
-                       filepath_to_store=os.environ['DATASET_DIR'])
+        #     unzip_file(filepath_pack=os.path.join(os.environ['DATASET_DIR'], "{}.tar.bz2".format(datasets[dataset_idx])),
+        #                filepath_to_store=os.environ['DATASET_DIR'])
 
 
 
-            args.reset_stored_filepaths = True
+        #     args.reset_stored_filepaths = True
 
         total_files = 0
         for subdir, dir, files in os.walk(dataset_path):
@@ -38,9 +38,6 @@ def maybe_unzip_dataset(args):
                 total_files == 3 and 'mini_imagenet_pkl' in datasets[dataset_idx]):
             print("file count is correct")
             done = True
-        elif datasets[dataset_idx] != 'omniglot_dataset' and datasets[dataset_idx] != 'mini_imagenet' and datasets[dataset_idx] != 'mini_imagenet_pkl':
-            done = True
-            print("using new dataset")
 
         if not done:
             shutil.rmtree(dataset_path, ignore_errors=True)

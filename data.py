@@ -11,8 +11,6 @@ from torchvision import transforms
 from PIL import ImageFile
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
-from utils.parser_utils import get_args
-
 
 class rotate_image(object):
 
@@ -91,7 +89,7 @@ def get_transforms_for_dataset(dataset_name, args, k):
 
     elif 'omniglot' in dataset_name:
 
-        transform_train = [rotate_image(k=k, channels=args.image_channels), transforms.ToTensor()]
+        transform_train = [rotate_image(k=k, channels=1), transforms.ToTensor()]
         transform_evaluate = [transforms.ToTensor()]
 
 
@@ -117,15 +115,24 @@ class FewShotLearningDatasetParallel(Dataset):
         data-provider. For transparency and readability reasons to explicitly set as self.object_name all arguments
         required for the data provider, such that the reader knows exactly what is necessary for the data provider/
         """
-        self.data_path = args.dataset_path
-        self.dataset_name = args.dataset_name
+        self.data_path = args.dataset.path
+        self.dataset_name = args.dataset.name
         self.data_loaded_in_memory = False
-        self.image_height, self.image_width, self.image_channel = args.image_height, args.image_width, args.image_channels
         self.args = args
-        self.indexes_of_folders_indicating_class = args.indexes_of_folders_indicating_class
+
+        if 'omniglot' in self.dataset_name:
+            self.indexes_of_folders_indicating_class = [-3, -2]
+            self.train_val_test_split = [0.70918052988, 0.03080714725, 0.2606284658]
+            self.image_height, self.image_width, self.image_channel = 28, 28, 1
+        elif 'imagenet' in self.dataset_name:
+            self.indexes_of_folders_indicating_class = [-3, -2]
+            self.train_val_test_split = [0.64, 0.16, 0.20]
+            self.image_height, self.image_width, self.image_channel = 84, 84, 3
+        else:
+            assert False
+
         self.reverse_channels = args.reverse_channels
         self.labels_as_int = args.labels_as_int
-        self.train_val_test_split = args.train_val_test_split
         self.current_set_name = "train"
         self.num_target_samples = args.num_target_samples
         self.reset_stored_filepaths = args.reset_stored_filepaths
@@ -241,7 +248,8 @@ class FewShotLearningDatasetParallel(Dataset):
                  string-names of the class
                  label_to_index: dictionary containing human understandable string mapped to numerical indexes
         """
-        dataset_dir = os.environ['DATASET_DIR']
+        # dataset_dir = os.environ['DATASET_DIR']
+        dataset_dir = os.path.split(self.data_path)[0]
         data_path_file = "{}/{}.json".format(dataset_dir, self.dataset_name)
         self.index_to_label_name_dict_file = "{}/map_to_label_name_{}.json".format(dataset_dir, self.dataset_name)
         self.label_name_to_map_dict_file = "{}/label_name_to_map_{}.json".format(dataset_dir, self.dataset_name)
